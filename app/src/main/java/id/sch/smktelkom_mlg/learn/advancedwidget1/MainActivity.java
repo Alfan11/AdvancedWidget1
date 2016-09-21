@@ -2,75 +2,92 @@ package id.sch.smktelkom_mlg.learn.advancedwidget1;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EdgeEffect;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+
+    Spinner spJumlah;
+    LinearLayout llAnak;
+    TextView tvHasil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final LinearLayout llMain = (LinearLayout) findViewById(R.id.linearLayoutMain);
+        spJumlah = (Spinner) findViewById(R.id.spinnerJumlahAnak);
+        Integer [] arJumlah = new Integer[10];
+        for (int i = 0; i < 10; i++)
+        {
+            arJumlah[i]=i+1;
+        }
+        ArrayAdapter adapter = new ArrayAdapter<> (this,
+                    android.R.layout.simple_spinner_item, arJumlah);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spJumlah.setAdapter(adapter);
 
-        addEditText(llMain);
+        llAnak = (LinearLayout) findViewById(R.id.linearLayoutAnak);
+        tvHasil = (TextView) findViewById(R.id.textViewHasil);
 
-        Button bProses = new Button(this);
-
-        final TextView tvHasil = new TextView(this);
-
-        llMain.addView(tvHasil);
-
-        bProses.setText("Proses");
-
-        llMain.addView(bProses);
-
-        bProses.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.buttonProses).setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
-                doProses(llMain);
+            public void onClick(View view)
+            {
+                doProses();
             }
         });
+
+        spJumlah.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int i, long l) {
+                addEditText((int)spJumlah.getSelectedItem());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                //
+            }
+        });
+
     }
 
-    private void doProses(LinearLayout llMain) {
-
-
-        String hasil="";
-        for (int i= 0; i < 5; i++){
-            EditText etNama = (EditText) llMain.getChildAt(i*2);
-            EditText etUmur = (EditText) llMain.getChildAt((1*2)+1);
-
-            String Nama = etNama.getText().toString().trim();
-            String Umur = etUmur.getText().toString();
-
-            if(Umur.isEmpty())
-                Umur="0";
-            if(!Nama.isEmpty())
-                hasil += "Anak ke-"+(i+1)+": "+Nama +" umur "+Umur+" tahun\n";
+    private void addEditText(int Jumlah)
+    {
+        llAnak.removeAllViews();
+        for (int i = 1; i <= Jumlah; i++)
+        {
+            View v = LayoutInflater.from(this).inflate(R.layout.layout_anak, llAnak, false);
+            v.setTag("Anak"+i);
+            llAnak.addView(v);
         }
-        TextView tvHasil = (TextView) llMain.getChildAt(11);
+    }
+    private void doProses() {
+        int Jumlah = (int) spJumlah.getSelectedItem();
+        String hasil = "";
+        for (int i = 1 ; i <= Jumlah; i++)
+        {
+            LinearLayout llNow = (LinearLayout) llAnak.findViewWithTag("Anak"+i);
+
+            EditText etNama = (EditText) llNow.findViewById(R.id.editTextNama);
+            EditText etUmur = (EditText) llNow.findViewById(R.id.editTextUmur);
+
+            String nama = etNama.getText().toString().trim();
+            String umur = etUmur.getText().toString();
+
+            if(umur.isEmpty())
+                umur="0";
+            if(!nama.isEmpty())
+                hasil += "Anak ke-" +i+": "+ nama +" umur "+umur+" tahun\n";
+        }
         tvHasil.setText(hasil);
     }
-
-    private void addEditText(LinearLayout llMain) {
-
-        for (int i = 1; i <= 5; i++) {
-            final EditText etNama = new EditText(this);
-            llMain.addView(etNama);
-            etNama.setHint("Isikan nama Anak");
-
-            final EditText etUmur = new EditText(this);
-            llMain.addView(etUmur);
-            etUmur.setHint("Isikan umur Anak");
-            etUmur.setInputType(InputType.TYPE_CLASS_NUMBER);
-        }
-    }
 }
-
-
